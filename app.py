@@ -31,6 +31,7 @@ import os
 
 def create_app():
     """创建并配置 Flask 应用"""
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     app = Flask(__name__, static_folder='static', static_url_path='/static')
     app.config.from_object(Config)
     CORS(app)
@@ -52,10 +53,10 @@ def create_app():
     # 页面路由
     @app.route('/')
     def index():
-        return send_from_directory('.', 'index.html')
+        return send_from_directory(BASE_DIR, 'index.html')
 
     # 上传文件静态服务
-    UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+    UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
     @app.route('/uploads/<path:filename>')
     def serve_upload(filename):
         return send_from_directory(UPLOAD_DIR, filename)
@@ -69,6 +70,10 @@ def create_app():
 
 
 app = create_app()
+
+# WSGI 启动时也要初始化数据库和题库
+init_db()
+init_question_bank()
 
 
 if __name__ == '__main__':
