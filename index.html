@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知径 · 高数错题诊断与学习路径</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- ========== 顶部导航 ========== -->
+<header class="topbar" id="topbar" style="display:none">
+  <div class="shell" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+    <div class="brand" onclick="goTo('home')" style="cursor:pointer">
+      <div class="brand-mark">径</div>
+      <div>知径<small>高数错题学习路径</small></div>
+    </div>
+    <nav class="nav" id="nav-menu"></nav>
+  </div>
+</header>
+
+<!-- ========== 登录/注册 ========== -->
+<section id="page-auth" class="page active">
+  <div class="shell">
+    <div class="auth-card">
+      <div class="auth-hero">
+        <div class="auth-icon">径</div>
+        <div class="eyebrow">比赛展示 · 学习闭环</div>
+        <h1>把一道错题，<br>变成下一步学习路径。</h1>
+        <p>把"做错一道题"拆成可执行的复盘过程：先找第一次真正偏离的位置，保留已经会的部分，再安排下一步修补与验证。</p>
+      </div>
+      <div class="auth-panel">
+        <div class="auth-tabs">
+          <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">登录</div>
+          <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">注册</div>
+        </div>
+        <div id="auth-form-login">
+          <div class="field">
+            <label>用户名</label>
+            <input type="text" class="form-input" id="login-username" placeholder="输入用户名">
+          </div>
+          <div class="field">
+            <label>密码</label>
+            <input type="password" class="form-input" id="login-password" placeholder="输入密码" onkeydown="if(event.key==='Enter')doLogin()">
+          </div>
+          <button class="solid-btn btn-block" onclick="doLogin()">登录 →</button>
+          <div id="login-error" class="form-error"></div>
+        </div>
+        <div id="auth-form-register" style="display:none">
+          <div class="field">
+            <label>角色选择</label>
+            <div class="role-picker">
+              <div class="role-card active" data-role="student" onclick="selectRole('student')">
+                <div class="role-icon">🎓</div>
+                <div class="role-label">学生</div>
+                <div class="role-desc">诊断错题、练习提升</div>
+              </div>
+              <div class="role-card" data-role="teacher" onclick="selectRole('teacher')">
+                <div class="role-icon">👨‍🏫</div>
+                <div class="role-label">教师</div>
+                <div class="role-desc">创建班级、查看学情</div>
+              </div>
+            </div>
+            <input type="hidden" id="reg-role" value="student">
+          </div>
+          <div class="field" id="reg-class-field">
+            <label>班级码 <span>选填，已有班级可填</span></label>
+            <input type="text" class="form-input" id="reg-class-code" placeholder="输入班级码加入班级" style="text-transform:uppercase">
+          </div>
+          <div class="field">
+            <label>用户名 <span>3-20个字符</span></label>
+            <input type="text" class="form-input" id="reg-username" placeholder="输入用户名" oninput="checkRegForm()">
+          </div>
+          <div class="field">
+            <label>密码 <span>至少6位，含字母和数字</span></label>
+            <input type="password" class="form-input" id="reg-password" placeholder="输入密码" oninput="checkRegForm()">
+            <div class="form-hint" id="password-strength-hint" style="display:none"></div>
+          </div>
+          <div class="field">
+            <label>确认密码</label>
+            <input type="password" class="form-input" id="reg-password2" placeholder="再次输入密码" oninput="checkRegForm()">
+          </div>
+          <button class="solid-btn btn-block" id="btn-register" onclick="doRegister()">注册 →</button>
+          <div id="reg-error" class="form-error"></div>
+        </div>
+        <div style="text-align:center;margin-top:16px">
+          <button class="ghost-btn btn-block" onclick="goTo('home'); updateNavForGuest();">游客体验（不保存数据）</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<!-- ========== 首页 ========== -->
+<section id="page-home" class="page">
+  <div class="shell">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow">高数错题 · 闭环学习</div>
+        <div id="class-badge-home" style="display:none;margin-bottom:10px"></div>
+        <h1>把一道错题，<br>变成下一步学习路径。</h1>
+        <p>先找第一次真正偏离的位置，保留已经会的部分，再安排下一步修补与验证。不做泛化建议，只补真正暴露出的薄弱点。</p>
+        <div class="hero-actions">
+          <button class="solid-btn" style="padding:13px 19px" onclick="goTo('input')">开始诊断 →</button>
+          <button class="ghost-btn" style="padding:13px 19px" onclick="useExampleData()">使用示例题体验</button>
+        </div>
+        <div class="hero-note">
+          <span><b>5</b>类错误原因</span>
+          <span><b>60+</b>个高数知识点</span>
+          <span><b>1</b>条闭环路径</span>
+        </div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-head">
+          <div><h3>本周学习画像</h3><p>从最近错题中提取真正需要优先修补的部分</p></div>
+          <span class="status-pill">可复盘</span>
+        </div>
+        <div class="stat-row">
+          <div class="mini-stat"><span>累计错题</span><b id="stat-total">—</b></div>
+          <div class="mini-stat"><span>完成练习</span><b id="stat-finished">—</b></div>
+          <div class="mini-stat"><span>已收藏</span><b id="stat-fav">—</b></div>
+        </div>
+        <div class="trend-wrap">
+          <div class="trend-title"><span>诊断活跃度</span><span>最近 7 天</span></div>
+          <div id="trend-bars" class="trend-bars"></div>
+        </div>
+        <div id="weak-list" style="display:grid;gap:8px;margin-top:15px"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><div class="eyebrow">学习闭环</div><h2>一条能讲清楚的学习闭环</h2></div></div>
+      <div class="flow-strip">
+        <div class="flow-item"><span>01</span><b>采集</b><span>拍照 / 上传 / 手工录入</span></div>
+        <div class="flow-item"><span>02</span><b>定位</b><span>知识点 + 第一次实质性错误</span></div>
+        <div class="flow-item"><span>03</span><b>修补</b><span>只补真正暴露出的薄弱点</span></div>
+        <div class="flow-item"><span>04</span><b>验证</b><span>三道递进练习反馈到学习画像</span></div>
+      </div>
+    </div>
+
+    <!-- 搜题工具 vs 知径 对比 -->
+    <div class="section">
+      <div class="section-head"><div><div class="eyebrow">为什么不是搜题工具</div><h2>搜题工具 vs 知径</h2></div><p>搜题工具给你答案，你抄完就忘。知径找到你为什么错，给你修补路径，再验证你真的会了。</p></div>
+      <div class="compare-grid">
+        <div class="compare-col compare-old">
+          <div class="compare-tag">搜题工具</div>
+          <div class="compare-items">
+            <div class="ci"><span class="ci-x">✗</span><div><b>给你答案</b><p>抄完就忘，下次同类型还是错</p></div></div>
+            <div class="ci"><span class="ci-x">✗</span><div><b>不分析原因</b><p>只告诉你选C，不说为什么选了B</p></div></div>
+            <div class="ci"><span class="ci-x">✗</span><div><b>没有后续</b><p>没有练习验证，不知道是否真会了</p></div></div>
+            <div class="ci"><span class="ci-x">✗</span><div><b>泛化刷题</b><p>推荐一堆题，不针对你的薄弱点</p></div></div>
+          </div>
+        </div>
+        <div class="compare-col compare-new">
+          <div class="compare-tag tag-green">知径</div>
+          <div class="compare-items">
+            <div class="ci"><span class="ci-check">✓</span><div><b>定位第一次偏离</b><p>保留你已经做对的步骤，只修补真正的错误</p></div></div>
+            <div class="ci"><span class="ci-check">✓</span><div><b>分析错误原因</b><p>150字以上结构化分析：哪里错、为什么错、缺什么知识</p></div></div>
+            <div class="ci"><span class="ci-check">✓</span><div><b>3道验证练习</b><p>针对性出题，做对了才说明真的修补了</p></div></div>
+            <div class="ci"><span class="ci-check">✓</span><div><b>BKT动态追踪</b><p>贝叶斯知识追踪，科学估计掌握度变化</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><div class="eyebrow">薄弱点分布</div><h2>当前最值得修补的知识点</h2></div><p>这里展示的是错题中反复出现的知识点，不用"掌握度百分比"制造虚假的精确感。</p></div>
+      <div id="repair-board" class="repair-board"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><div class="eyebrow">最近记录</div><h2>最近诊断</h2></div><button class="ghost-btn" onclick="goTo('history')">查看全部</button></div>
+      <div id="recent-list" class="record-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 录入错题 ========== -->
+<section id="page-input" class="page">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">错题录入</div><h2>录入一道错题</h2></div><p>先把原题、你的作答和标准答案放在一起。图片识别后仍可手工校正，避免数学符号误识别直接进入诊断。</p></div>
+    <div class="sample-chips">
+      <button class="sample-chip" onclick="useExampleData()">示例：复合函数求导</button>
+    </div>
+    <input type="hidden" id="input-subject" value="高等数学" />
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title"><div><h2>拍照 / 上传</h2><p>支持手机拍照，也可上传截图</p></div></div>
+        <div class="upload-box" id="upload-area">
+          <div class="upload-inner" id="upload-placeholder">
+            <div class="upload-icon">📷</div>
+            <h3>把错题照片放到这里</h3>
+            <p>点击选择图片，或在电脑端拖入文件</p>
+          </div>
+          <input type="file" id="input-image" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer" />
+        </div>
+        <div id="crop-container" style="display:none">
+          <div class="crop-canvas-wrap" id="crop-canvas-wrap">
+            <img id="crop-image" />
+            <canvas id="crop-overlay"></canvas>
+          </div>
+          <div class="crop-hint" id="crop-hint">✋ 拖拽框选要识别的区域（不选则识别整图）</div>
+          <div class="crop-actions">
+            <button class="ghost-btn" onclick="resetImageUpload()">重新选择</button>
+            <button class="ghost-btn" id="btn-rescan" onclick="rescanWithCrop()" style="display:none">✂ 框选区域重新识别</button>
+            <button class="solid-btn" id="btn-scan" onclick="scanImage()">扫描识别 →</button>
+          </div>
+          <div id="scan-loading" style="display:none" class="scan-loading-wrap">
+            <div class="scan-progress">
+              <div class="scan-spinner"></div>
+              <div class="scan-steps-text" id="scan-steps-text">AI 正在识别图片内容...</div>
+            </div>
+            <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+          </div>
+          <div id="scan-result" style="display:none"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><div><h2>核对题目信息</h2><p>点击公式可直接修改</p></div></div>
+        <div class="field">
+          <label>题目 <span>原题</span></label>
+          <div class="math-preview-box" id="preview-box-question" onclick="toggleEdit('question')">
+            <div class="math-preview-content" id="math-preview-question">
+              <span class="preview-placeholder">请输入题目，或从左侧拍照上传</span>
+            </div>
+            <div class="math-preview-edit-btn">✏️ 修改</div>
+          </div>
+          <div class="math-edit-area" id="edit-area-question" style="display:none">
+            <textarea class="textarea" id="input-question" placeholder="例如：求函数 f(x)=sin(x²) 的导数。" oninput="updatePreview('input-question')"></textarea>
+            <div class="edit-tip">支持 LaTeX 公式，用 $...$ 包裹行内公式</div>
+          </div>
+          <div class="form-error" id="err-question">请输入题目</div>
+        </div>
+        <div class="field">
+          <label>你的作答 <span>保留原步骤</span></label>
+          <div class="math-preview-box" id="preview-box-student" onclick="toggleEdit('student')">
+            <div class="math-preview-content" id="math-preview-student">
+              <span class="preview-placeholder">请输入你的作答过程</span>
+            </div>
+            <div class="math-preview-edit-btn">✏️ 修改</div>
+          </div>
+          <div class="math-edit-area" id="edit-area-student" style="display:none">
+            <textarea class="textarea" id="input-student" placeholder="尽量保留你的原始解题步骤。" oninput="updatePreview('input-student')"></textarea>
+            <div class="edit-tip">支持 LaTeX 公式，用 $...$ 包裹行内公式</div>
+          </div>
+          <div class="form-error" id="err-student">请输入你的答案</div>
+        </div>
+        <div class="field">
+          <label>标准答案 <span>用于对照</span></label>
+          <div class="math-preview-box" id="preview-box-correct" onclick="toggleEdit('correct')">
+            <div class="math-preview-content" id="math-preview-correct">
+              <span class="preview-placeholder">请输入标准答案</span>
+            </div>
+            <div class="math-preview-edit-btn">✏️ 修改</div>
+          </div>
+          <div class="math-edit-area" id="edit-area-correct" style="display:none">
+            <textarea class="textarea" id="input-correct" placeholder="可来自老师批改、答案册或你核对后的正确解法。" oninput="updatePreview('input-correct')"></textarea>
+            <div class="edit-tip">支持 LaTeX 公式，用 $...$ 包裹行内公式</div>
+          </div>
+          <div class="form-error" id="err-correct">请输入标准答案</div>
+        </div>
+        <div class="form-actions">
+          <button class="solid-btn" id="btn-start-diagnosis" onclick="startDiagnosis()">定位这次错误 →</button>
+          <button class="paper-btn" onclick="clearInputPage(true)">清空</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 图谱练习弹窗 ========== -->
+<div id="gp-modal" class="gp-modal" style="display:none">
+  <div class="gp-modal-content">
+    <div class="gp-modal-header">
+      <div>
+        <div class="eyebrow">图谱练习</div>
+        <h2 id="gp-title">针对性训练</h2>
+      </div>
+      <button class="ghost-btn" onclick="closeGraphPractice()" style="padding:6px 12px">✕</button>
+    </div>
+    <div id="gp-loading" style="padding:40px;text-align:center;display:none">
+      <div class="scan-spinner" style="margin:0 auto 12px"></div>
+      <p style="color:var(--muted);font-size:13px">正在生成练习题…</p>
+    </div>
+    <div id="gp-main" style="display:none">
+      <div class="practice-progress-wrap">
+        <div class="practice-progress-bar"><div class="practice-progress-fill" id="gp-progress" style="width:0%"></div></div>
+        <div class="practice-dots" id="gp-dots"></div>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-num" id="gp-count">第 1 题</div>
+        <h3 id="gp-question" class="formatted-content">—</h3>
+        <div class="options" id="gp-options"></div>
+        <div class="explain" id="gp-explanation"></div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="ghost-btn" id="gp-prev" onclick="gpPrev()" style="display:none">← 上一题</button>
+        <button class="solid-btn" id="gp-submit" onclick="gpSubmit()">提交答案</button>
+        <button class="ghost-btn" id="gp-next" onclick="gpNext()" style="display:none">下一题 →</button>
+      </div>
+      <div id="gp-result" style="display:none;margin-top:16px">
+        <div class="score-card show" style="margin-bottom:16px">
+          <div><span>本轮验证</span><div><b id="gp-score">0/3</b> 正确</div></div>
+          <div id="gp-advice" style="max-width:520px;color:#d7e0dc;font-size:13px"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="solid-btn" onclick="gpRestart()">再练一组 →</button>
+          <button class="ghost-btn" onclick="closeGraphPractice()">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 诊断加载层 ========== -->
+<section id="page-report" class="page">
+  <div class="shell">
+    <div class="report-top">
+      <div class="report-lead">
+        <div class="report-kicker">本题诊断</div>
+        <h1 id="report-weakness">—</h1>
+        <p id="report-lead-text">系统会先保留你已经做对的部分，只把注意力放到第一次真正影响结果的错误上。</p>
+        <div class="report-tags">
+          <span class="report-tag" id="report-kp">—</span>
+          <span class="report-tag" id="report-error-type">—</span>
+        </div>
+      </div>
+      <div class="report-side">
+        <div class="insight-card"><span>已经会的</span><b>不重复推倒重学</b><p id="mastered-text">从当前作答中保留已有能力。</p></div>
+        <div class="insight-card"><span>优先修补</span><b id="priority-text">—</b><p>下一组练习只围绕这个薄弱点展开。</p></div>
+      </div>
+    </div>
+
+    <div class="report-grid">
+      <div class="block">
+        <h2>错在哪里</h2>
+        <div class="evidence">
+          <div class="evidence-row"><strong>已掌握</strong><p id="evidence-good">保留已有正确步骤。</p></div>
+          <div class="evidence-row critical"><strong>首次偏离</strong><p id="evidence-error" class="formatted-content">—</p></div>
+          <div class="evidence-row"><strong>结果影响</strong><p id="evidence-impact">这一步导致后续结果与标准答案分离。</p></div>
+        </div>
+      </div>
+      <div class="block">
+        <h2>下一步怎么补</h2>
+        <div id="learning-path" class="path-list"></div>
+        <div class="k-path" id="k-path-section" style="display:none">
+          <div class="k-path-title">知识路径</div>
+          <div id="knowledge-nodes" class="k-nodes"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 掌握度 -->
+    <div class="block" style="margin-top:20px">
+      <h2>当前掌握度估计</h2>
+      <div class="mastery-section">
+        <div class="mastery-ring">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="8"/>
+            <circle id="mastery-fill" cx="60" cy="60" r="52" fill="none" stroke="var(--green)" stroke-width="8" stroke-dasharray="327" stroke-dashoffset="327" stroke-linecap="round" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1s var(--ease)"/>
+          </svg>
+          <div class="mastery-center">
+            <div class="mastery-percent" id="mastery-percent">0%</div>
+            <div class="mastery-label" id="mastery-level">—</div>
+          </div>
+        </div>
+        <div class="mastery-hint">掌握度为 AI 根据当前错题作出的估计，仅供参考。持续练习可更准确评估。</div>
+      </div>
+    </div>
+
+    <!-- 相关知识点 -->
+    <div class="block" id="related-card" style="margin-top:20px;display:none">
+      <h2>相关知识点</h2>
+      <div class="tag-group" id="related-tags"></div>
+    </div>
+
+    <!-- AI 追问 -->
+    <div class="block" id="chat-panel-card" style="margin-top:20px;display:none">
+      <div class="chat-toggle" onclick="toggleChat()">
+        <span>💬</span> <span id="chat-toggle-text">向 AI 老师追问这道题</span>
+        <span style="margin-left:auto" id="chat-arrow">▼</span>
+      </div>
+      <div class="chat-panel" id="chat-panel-body" style="display:none">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+          <textarea class="chat-input" id="chat-input" placeholder="输入你的问题..." rows="1"></textarea>
+          <button class="solid-btn chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">发送</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="report-actions">
+      <button id="fav-btn" class="ghost-btn" onclick="toggleFavoriteFromReport()">☆ 收藏这道错题</button>
+      <button class="solid-btn" onclick="showPracticeOptions()">开始 3 道针对练习 →</button>
+      <button class="paper-btn" onclick="goTo('input')">再录一道</button>
+    </div>
+
+    <!-- 练习来源选择 -->
+    <div id="practice-source-modal" class="practice-source-modal" style="display:none">
+      <div class="practice-source-card">
+        <div class="eyebrow">选择练习来源</div>
+        <h3>你想怎么练？</h3>
+        <p>选择题库中的经典题目快速验证，或让 AI 生成全新题目。</p>
+        <div class="source-options">
+          <button class="source-option" onclick="startPractice('auto')">
+            <div class="source-icon">⚡</div>
+            <div class="source-info"><b>智能推荐</b><p>题库优先，不足时 AI 补充</p></div>
+          </button>
+          <button class="source-option" onclick="startPractice('bank')">
+            <div class="source-icon">📚</div>
+            <div class="source-info"><b>题库抽题</b><p>从预置题库中随机抽取</p></div>
+          </button>
+          <button class="source-option" onclick="startPractice('ai')">
+            <div class="source-icon">🤖</div>
+            <div class="source-info"><b>AI 生成</b><p>AI 根据薄弱点全新生成</p></div>
+          </button>
+        </div>
+        <button class="ghost-btn btn-block" onclick="document.getElementById('practice-source-modal').style.display='none'">取消</button>
+      </div>
+    </div>
+
+    <!-- 练习区 -->
+    <div id="practice-wrap" class="practice-wrap" style="display:none">
+      <div class="practice-head">
+        <div><div class="eyebrow">针对练习</div><h2>马上验证，不把建议停在纸面上</h2></div>
+        <p id="practice-topic">—</p>
+      </div>
+      <div id="practice-main" style="display:none">
+        <div class="practice-progress-wrap">
+          <div class="practice-progress-bar"><div class="practice-progress-fill" id="practice-progress" style="width:0%"></div></div>
+          <div class="practice-dots" id="practice-dots"></div>
+        </div>
+        <div class="quiz-card">
+          <div class="quiz-num" id="practice-count">第 1 题</div>
+          <h3 id="practice-question" class="formatted-content">—</h3>
+          <div class="options" id="practice-options"></div>
+          <div class="explain" id="practice-explanation"></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="ghost-btn" id="btn-prev-practice" onclick="prevPractice()" style="display:none">← 上一题</button>
+          <button class="solid-btn" id="btn-submit-practice" onclick="submitPractice()">提交答案</button>
+          <button class="ghost-btn" id="btn-next-practice" onclick="nextPractice()" style="display:none">下一题 →</button>
+        </div>
+        <div id="score-actions" style="display:none;margin-top:14px;gap:10px;flex-wrap:wrap">
+          <button class="solid-btn" onclick="document.getElementById('practice-wrap').style.display='none';document.getElementById('score-actions').style.display='none';document.getElementById('report-top').scrollIntoView({behavior:'smooth'})">查看诊断报告 ↑</button>
+          <button class="ghost-btn" onclick="practiceAgain()">再练一组 →</button>
+          <button class="paper-btn" onclick="document.getElementById('practice-wrap').style.display='none';document.getElementById('score-actions').style.display='none';goTo('input')">录入新题 →</button>
+        </div>
+      </div>
+      <div id="practice-loading" style="display:none;padding:40px;text-align:center">
+        <div class="scan-spinner" style="margin:0 auto 12px"></div>
+        <p style="color:var(--muted);font-size:13px">AI 正在按当前薄弱点生成练习…</p>
+      </div>
+      <div id="score-card" class="score-card" style="display:none">
+        <div><span>本轮验证</span><div><b id="score-text">0/3</b> 正确</div></div>
+        <div id="score-advice" style="max-width:520px;color:#d7e0dc;font-size:13px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 学习记录 ========== -->
+<section id="page-history" class="page">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">学习记录</div><h2>学习记录</h2></div><p>不是简单堆错题，而是保留"知识点—错误原因—下一步"三层信息，方便复盘。</p></div>
+    <div class="search-row"><input id="history-search" class="search-input" placeholder="搜索题目、知识点或薄弱点"><button class="solid-btn" onclick="loadHistory()">搜索</button></div>
+    <div id="history-list" class="record-list"></div>
+  </div>
+</section>
+
+<!-- ========== 错题本 ========== -->
+<section id="page-notebook" class="page">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">错题收藏</div><h2>错题本</h2></div><p>收藏后会进入复盘节奏；支持增删改查、备注和按知识点筛选。</p></div>
+    <div class="filter-bar" id="notebook-filters"></div>
+    <div id="notebook-list" class="record-list"></div>
+  </div>
+</section>
+
+<!-- ========== 学习看板 ========== -->
+<section id="page-dashboard" class="page">
+  <div class="shell">
+    <div class="section-head"><div><div class="eyebrow">学习画像</div><h2>学习看板</h2></div><p>基于贝叶斯知识追踪(BKT)的动态掌握度估计，不是 AI 瞎猜。</p></div>
+
+    <!-- 概览卡片 -->
+    <div class="dash-overview" id="dashboard-stats"></div>
+
+    <!-- 智能学习建议 -->
+    <div class="dash-advice-card" id="dash-advice">
+      <div class="dac-header">
+        <span class="dac-icon">💡</span>
+        <div>
+          <h3>智能学习建议</h3>
+          <p>基于你的诊断和练习数据自动生成</p>
+        </div>
+      </div>
+      <div class="dac-body" id="dash-advice-body"></div>
+    </div>
+
+    <!-- 双列布局：左图右条 -->
+    <div class="dash-grid">
+      <div class="dash-chart-card">
+        <h3>掌握度变化趋势</h3>
+        <div id="mastery-trend-chart" style="min-height:280px"></div>
+      </div>
+      <div class="dash-chart-card">
+        <h3>知识点掌握详情</h3>
+        <div id="knowledge-bars" class="kp-bars"></div>
+      </div>
+    </div>
+
+    <!-- 双列布局：雷达 + 练习趋势 -->
+    <div class="dash-grid" style="margin-top:20px">
+      <div class="dash-chart-card">
+        <h3>知识点雷达图</h3>
+        <div id="radar-chart" style="min-height:280px"></div>
+      </div>
+      <div class="dash-chart-card">
+        <h3>练习正确率趋势</h3>
+        <div id="practice-trend-chart" style="min-height:280px"></div>
+      </div>
+    </div>
+
+    <!-- 薄弱点分布 -->
+    <div class="block" style="margin-top:20px">
+      <h2>薄弱点分布</h2>
+      <div id="weakness-distribution"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 教师看板页 ========== -->
+<section id="page-teacher" class="page">
+  <div class="shell">
+    <div class="page-header" style="margin-bottom:24px">
+      <div class="eyebrow">教学辅助 · 班级学情</div>
+      <h1 style="font-size:28px;font-weight:700;margin:8px 0">教师看板</h1>
+      <p style="color:var(--muted)">查看班级整体错题分布、共性薄弱点，辅助调整教学重点。</p>
+    </div>
+
+    <div id="teacher-classes" style="margin-bottom:24px">
+      <div class="card-row" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <button class="solid-btn" onclick="showCreateClassDialog()">+ 创建班级</button>
+      </div>
+      <div id="teacher-class-list" class="card-grid" style="margin-top:16px"></div>
+    </div>
+
+    <div id="teacher-detail" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <button class="ghost-btn" onclick="backToClassList()">← 返回班级列表</button>
+        <div>
+          <h2 id="teacher-class-name" style="font-size:20px;font-weight:600"></h2>
+          <p id="teacher-class-meta" style="color:var(--muted);font-size:13px"></p>
+        </div>
+      </div>
+
+      <div class="stat-row" id="teacher-stats-row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px"></div>
+
+      <div class="card-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+        <div class="card" style="padding:20px">
+          <h3 style="font-size:16px;font-weight:600;margin-bottom:14px">📊 共性薄弱点 Top5</h3>
+          <div id="teacher-weakness-chart"></div>
+        </div>
+        <div class="card" style="padding:20px">
+          <h3 style="font-size:16px;font-weight:600;margin-bottom:14px">📚 知识点错题分布</h3>
+          <div id="teacher-kp-chart"></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:20px">
+        <h3 style="font-size:16px;font-weight:600;margin-bottom:14px">👥 学生学情列表</h3>
+        <div id="teacher-student-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 知识图谱页 ========== -->
+<section id="page-graph" class="page">
+  <div class="shell">
+    <div class="page-header" style="margin-bottom:24px">
+      <div class="eyebrow">高数知识体系 · 前置关系</div>
+      <h1 style="font-size:28px;font-weight:700;margin:8px 0">知识图谱</h1>
+      <p style="color:var(--muted)">可视化展示高等数学知识点之间的依赖关系。点击节点查看详细内容、前置知识和学习建议。</p>
+    </div>
+
+    <div id="graph-smart-hint" class="graph-hint-bar" style="display:none"></div>
+
+    <div class="card" style="padding:20px;margin-bottom:20px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <div style="position:relative;flex:1;min-width:200px">
+          <input type="text" id="graph-search" class="form-input" placeholder="搜索知识点..." style="width:100%;padding-left:36px" oninput="searchGraph()">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px">🔍</span>
+        </div>
+        <select id="graph-chapter-filter" class="form-input" style="width:auto;padding:8px 14px" onchange="filterGraph()">
+          <option value="">全部章节</option>
+        </select>
+        <button class="ghost-btn" style="padding:8px 14px;font-size:13px" onclick="highlightLearningPath()">🧭 智能路径</button>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;padding:8px 12px;background:var(--paper);border-radius:10px;font-size:12px;color:var(--muted)">
+        <span>● 已掌握 (≥70%)</span>
+        <span style="color:var(--gold)">● 学习中 (40-69%)</span>
+        <span style="color:var(--clay)">● 薄弱 (<40%)</span>
+        <span>● 未学习</span>
+        <span>⭐基础 ⭐⭐进阶 ⭐⭐⭐高阶</span>
+      </div>
+      <div id="graph-container" style="width:100%;height:520px;min-height:400px"></div>
+    </div>
+
+    <div id="graph-detail" class="graph-detail-panel" style="display:none">
+      <div class="graph-detail-header">
+        <button class="ghost-btn" onclick="closeGraphDetail()">✕ 关闭</button>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <h3 id="graph-detail-name" style="font-size:20px;font-weight:700"></h3>
+            <span id="graph-detail-difficulty" style="font-size:13px"></span>
+          </div>
+          <p id="graph-detail-chapter" style="color:var(--muted);font-size:13px;margin-top:2px"></p>
+        </div>
+      </div>
+
+      <div id="graph-detail-mastery" class="graph-mastery-row" style="margin-bottom:16px"></div>
+
+      <div class="graph-detail-grid">
+        <div class="graph-detail-section">
+          <h4>📖 核心概念</h4>
+          <p id="graph-detail-concept" style="font-size:14px;line-height:1.8;color:var(--ink-2)"></p>
+        </div>
+        <div class="graph-detail-section">
+          <h4>📝 常见考法</h4>
+          <ul id="graph-detail-exams" class="graph-detail-list"></ul>
+        </div>
+        <div class="graph-detail-section graph-detail-error">
+          <h4>⚠️ 典型错误</h4>
+          <p id="graph-detail-errors" style="font-size:14px;line-height:1.7"></p>
+        </div>
+        <div class="graph-detail-section graph-detail-advice">
+          <h4>💡 学习建议</h4>
+          <p id="graph-detail-advice" style="font-size:14px;line-height:1.7"></p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px" class="graph-prereq-grid">
+        <div>
+          <h4 style="font-size:14px;font-weight:600;margin-bottom:10px">📌 前置知识</h4>
+          <div id="graph-detail-prereqs" class="graph-tag-list"></div>
+        </div>
+        <div>
+          <h4 style="font-size:14px;font-weight:600;margin-bottom:10px">🚀 后续知识</h4>
+          <div id="graph-detail-successors" class="graph-tag-list"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px">
+        <button class="solid-btn" id="graph-detail-practice" style="padding:10px 20px">针对此知识点练习 →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ========== 诊断加载层 ========== -->
+<div id="loading-layer" class="loading-layer">
+  <div class="loading-card">
+    <div class="eyebrow">诊断过程</div>
+    <h2>把这道错题拆清楚</h2>
+    <p>不是生成一段长评语，而是先找出第一次真正影响结果的偏离。</p>
+    <div class="progress-track"><i id="progress-bar"></i></div>
+    <div id="load-steps">
+      <div class="loading-step"><i>1</i><span>整理题目与作答结构</span></div>
+      <div class="loading-step"><i>2</i><span>定位第一次实质性错误</span></div>
+      <div class="loading-step"><i>3</i><span>映射知识点与错误类型</span></div>
+      <div class="loading-step"><i>4</i><span>安排下一步修补路径</span></div>
+    </div>
+    <div class="stream-output" id="stream-output" style="display:none;margin-top:16px">
+      <div class="stream-label">AI 输出中</div>
+      <div class="stream-text" id="stream-text"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Toast ========== -->
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
