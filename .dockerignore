@@ -1,0 +1,14 @@
+.env
+*.db
+*.sqlite
+__pycache__
+*.pyc
+uploads/
+.git
+.gitignore
+Dockerfile
+.dockerignore
+node_modules
+venv
+.venv
+*.log
